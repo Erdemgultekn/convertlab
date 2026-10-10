@@ -3,150 +3,133 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ConvertLab - Unit Conversions for Engineers</title>
+  <title>ConvertCAD — Technical Drafting Interface</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <header class="navbar">
-    <div class="nav-container">
-      <div class="logo">
-        <span class="logo-icon">⚙️</span>
-        <span class="logo-text">ConvertLab</span>
+  <!-- CAD Crosshair -->
+  <div class="crosshair-x" id="crosshair-x"></div>
+  <div class="crosshair-y" id="crosshair-y"></div>
+
+  <!-- Main Drafting Board -->
+  <div class="drafting-board">
+    <div class="drawing-frame">
+      
+      <!-- Top HUD -->
+      <header class="cad-header">
+        <div class="cad-logo">
+          <span>[+] ConvertCAD_V2.0</span>
+          <span class="blinking-cursor">_</span>
+        </div>
+        <div class="cad-coords" id="coords-display">X: 0.0000, Y: 0.0000</div>
+      </header>
+
+      <!-- Command Toolbars -->
+      <div class="tool-ribbon">
+        <button class="tool-btn active" data-tab="length">[DIM_LINEAR]</button>
+        <button class="tool-btn" data-tab="pressure">[PRESSURE_CALC]</button>
+        <button class="tool-btn" data-tab="mechanical">[TORQUE_DRIVE]</button>
+        <button class="tool-btn" data-tab="pump">[TURBINE_PUMP]</button>
       </div>
-      <nav class="nav-links">
-        <a href="#converter">Converter</a>
-        <a href="#pricing">Pricing</a>
-        <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">
-          <span id="theme-icon">🌙</span>
-        </button>
-      </nav>
-    </div>
-  </header>
 
-  <!-- Hero Section -->
-  <main class="main-content">
-    <section class="hero">
-      <h1 class="hero-title">Unit conversions for engineers.<br><span class="accent-text">Fast. Free. Accurate.</span></h1>
-      <p class="hero-subtitle">Length, mass, pressure, energy, temperature, and torque in one clean, zero-latency tool.</p>
-    </section>
-
-    <!-- Converter Card -->
-    <section id="converter" class="converter-section">
-      <div class="converter-card">
+      <!-- Main Workspace -->
+      <div class="workspace">
         
-        <!-- Category Tabs -->
-        <div class="category-tabs" id="tabs">
-          <button class="tab-btn active" data-category="length">Length</button>
-          <button class="tab-btn" data-category="mass">Mass</button>
-          <button class="tab-btn" data-category="pressure">Pressure</button>
-          <button class="tab-btn" data-category="energy">Energy</button>
-          <button class="tab-btn" data-category="temperature">Temperature</button>
-          <button class="tab-btn highlight-tab" data-category="torque">Torque & Power ⚡</button>
-        </div>
-
-        <!-- Standard Converter Body -->
-        <div id="standard-converter" class="converter-body">
-          <div class="converter-grid">
-            <div class="input-group">
-              <label for="from-value">From</label>
-              <input type="number" id="from-value" value="1" step="any">
-              <select id="from-unit"></select>
-            </div>
-
-            <button id="swap-btn" class="swap-btn" title="Swap units">⇄</button>
-
-            <div class="input-group">
-              <label for="to-value">To</label>
-              <input type="number" id="to-value" value="0.1" step="any" readonly>
-              <select id="to-unit"></select>
-            </div>
+        <!-- Standard Conversion Panel -->
+        <div id="standard-panel" class="cad-panel">
+          <div class="dim-line">
+            <span class="dim-text">INPUT_VALUE</span>
+            <input type="number" id="from-value" value="150" step="any">
+            <select id="from-unit"></select>
           </div>
+          
+          <button id="swap-btn" class="cad-swap">⇆ REVERSE_AXIS</button>
 
-          <div class="conversion-summary">
-            <span id="formula-display">1 mm = 0.1 cm</span>
+          <div class="dim-line result-line">
+            <span class="dim-text">OUTPUT_VALUE</span>
+            <input type="number" id="to-value" readonly>
+            <select id="to-unit"></select>
+          </div>
+          
+          <div class="formula-display" id="formula-display">
+            > SCALE FACTOR: COMPUTING...
           </div>
         </div>
 
-        <!-- Engineering Special Tab (Torque & Power) -->
-        <div id="torque-converter" class="converter-body hidden">
-          <div class="engineering-grid">
-            <div class="input-group">
-              <label for="torque-input">Torque (T)</label>
-              <div class="input-with-unit">
-                <input type="number" id="torque-input" value="150" step="any">
-                <span class="unit-tag">N·m</span>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <label for="rpm-input">Rotational Speed (n)</label>
-              <div class="input-with-unit">
-                <input type="number" id="rpm-input" value="3000" step="any">
-                <span class="unit-tag">RPM</span>
-              </div>
-            </div>
+        <!-- Mechanical / Torque Panel -->
+        <div id="mechanical-panel" class="cad-panel hidden">
+          <div class="dim-line">
+            <span class="dim-text">TORQUE (N·m)</span>
+            <input type="number" id="mech-torque" value="350">
           </div>
-
-          <div class="engineering-result">
-            <div class="result-box">
-              <span class="result-label">Calculated Power</span>
-              <span class="result-val" id="power-kw">47.12 kW</span>
-            </div>
-            <div class="result-box">
-              <span class="result-label">Horsepower</span>
-              <span class="result-val" id="power-hp">63.19 HP</span>
-            </div>
+          <div class="dim-line">
+            <span class="dim-text">SPEED (RPM)</span>
+            <input type="number" id="mech-rpm" value="3000">
           </div>
-          <p class="formula-footnote">Formula: \( P = T \times \omega = T \times \frac{2\pi \cdot \text{RPM}}{60} \)</p>
+          
+          <div class="engineering-output">
+            <div class="eng-row"><span>> ANGULAR_VELOCITY (ω):</span> <span class="eng-val" id="mech-omega">0.00 rad/s</span></div>
+            <div class="eng-row highlight"><span>> SHAFT_POWER (P):</span> <span class="eng-val" id="mech-kw">0.00 kW</span></div>
+          </div>
+        </div>
+
+        <!-- NEW: Turbine / Pump Panel -->
+        <div id="pump-panel" class="cad-panel hidden">
+          <div class="dim-line">
+            <span class="dim-text">HEAD_H (m)</span>
+            <input type="number" id="pump-head" value="45">
+          </div>
+          <div class="dim-line">
+            <span class="dim-text">FLOW_Q (m³/s)</span>
+            <input type="number" id="pump-flow" value="0.25">
+          </div>
+          <div class="dim-line">
+            <span class="dim-text">EFFICIENCY_η (%)</span>
+            <input type="number" id="pump-eff" value="85" max="100">
+          </div>
+          
+          <div class="engineering-output">
+            <div class="eng-row"><span>> FLUID_DENSITY:</span> <span class="eng-val">1000 kg/m³</span></div>
+            <div class="eng-row highlight"><span>> HYDRAULIC_POWER:</span> <span class="eng-val" id="pump-power">0.00 kW</span></div>
+            <div class="formula-display">> P = (ρ × g × H × Q) / η</div>
+          </div>
         </div>
 
       </div>
-    </section>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="pricing-section">
-      <h2 class="section-title">Transparent Pricing</h2>
-      <p class="section-subtitle">Start free as a student, scale when you need advanced exports.</p>
+      <!-- Technical Drawing Title Block (Antet) -->
+      <table class="title-block">
+        <tr>
+          <td colspan="2" class="title-main">PROJECT: TURBINE MAINTENANCE & REPAIR UNIT</td>
+          <td class="title-sub">TOLERANCE:<br>±0.05</td>
+          <td class="title-sub">SCALE:<br>1:1</td>
+        </tr>
+        <tr>
+          <td class="title-sub" style="width: 30%">DESIGNER:<br>ERDEM GÜLTEKİN</td>
+          <td class="title-main">PART: RUBBER BEARING BUSHING / KAPLİN TAKOZU</td>
+          <td class="title-sub">DWG NO:<br>ME-4830</td>
+          <td class="title-sub">REV:<br>01</td>
+        </tr>
+      </table>
 
-      <div class="pricing-grid">
-        <div class="pricing-card">
-          <h3 class="tier-name">Student</h3>
-          <div class="tier-price">$0</div>
-          <p class="tier-desc">All standard converters. Forever free for university projects and coursework.</p>
-          <ul class="features-list">
-            <li>✓ All core engineering units</li>
-            <li>✓ Fast offline calculation</li>
-            <li>✓ Mobile & tablet responsive</li>
-            <li>✓ Dark mode theme</li>
-          </ul>
-          <button class="pricing-btn secondary" disabled>Current Plan</button>
-        </div>
+    </div>
 
-        <div class="pricing-card featured">
-          <div class="badge">Most Popular</div>
-          <h3 class="tier-name">Pro Engineer</h3>
-          <div class="tier-price">$4<span class="period">/mo</span></div>
-          <p class="tier-desc">For engineering teams needing formula logs, team sharing, and CSV exports.</p>
-          <ul class="features-list">
-            <li>✓ Everything in Student</li>
-            <li>✓ Full conversion history export</li>
-            <li>✓ Custom formula builder</li>
-            <li>✓ Direct CAD & Excel integrations</li>
-          </ul>
-          <button class="pricing-btn primary">Upgrade to Pro</button>
-        </div>
+    <!-- AutoCAD Style Command Line -->
+    <div class="command-line">
+      <div class="cmd-history" id="cmd-history">
+        <div>ConvertCAD System Initialized...</div>
+        <div>Loading physics modules... Done.</div>
       </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <p>© 2026 ConvertLab. Built for engineers with clean JavaScript.</p>
-  </footer>
+      <div class="cmd-input">
+        <span class="cmd-prompt">Command:</span>
+        <input type="text" id="fake-cmd" placeholder="Type a command or click tools..." readonly>
+      </div>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
