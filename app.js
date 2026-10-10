@@ -1,213 +1,159 @@
-// Units database with factors relative to standard base units
-const unitData = {
+// AutoCAD Crosshair & Coordinates tracking
+const crossX = document.getElementById('crosshair-x');
+const crossY = document.getElementById('crosshair-y');
+const coordsDisplay = document.getElementById('coords-display');
+
+document.addEventListener('mousemove', (e) => {
+  crossX.style.top = e.clientY + 'px';
+  crossY.style.left = e.clientX + 'px';
+  
+  // Fake CAD coordinates based on mouse position
+  const cadX = (e.clientX * 0.543).toFixed(4);
+  const cadY = ((window.innerHeight - e.clientY) * 0.543).toFixed(4);
+  coordsDisplay.textContent = `X: ${cadX}, Y: ${cadY}`;
+});
+
+// AutoCAD Style Command Line Logger
+const cmdHistory = document.getElementById('cmd-history');
+const cmdInput = document.getElementById('fake-cmd');
+
+function logCommand(text) {
+  const div = document.createElement('div');
+  div.textContent = `> ${text}`;
+  cmdHistory.appendChild(div);
+  
+  // Keep only last 3 lines
+  while (cmdHistory.children.length > 3) {
+    cmdHistory.removeChild(cmdHistory.firstChild);
+  }
+}
+
+// Unit Definitions
+const UNITS = {
   length: {
-    base: 'm',
-    units: {
-      mm: { name: 'Millimeter (mm)', factor: 0.001 },
-      cm: { name: 'Centimeter (cm)', factor: 0.01 },
-      m:  { name: 'Meter (m)', factor: 1.0 },
-      km: { name: 'Kilometer (km)', factor: 1000.0 },
-      in: { name: 'Inch (in)', factor: 0.0254 },
-      ft: { name: 'Foot (ft)', factor: 0.3048 }
-    }
-  },
-  mass: {
-    base: 'kg',
-    units: {
-      mg:  { name: 'Milligram (mg)', factor: 0.000001 },
-      g:   { name: 'Gram (g)', factor: 0.001 },
-      kg:  { name: 'Kilogram (kg)', factor: 1.0 },
-      ton: { name: 'Metric Ton (t)', factor: 1000.0 },
-      lb:  { name: 'Pound (lb)', factor: 0.45359237 }
-    }
+    items: {'mm': 0.001, 'cm': 0.01, 'm': 1, 'in': 0.0254, 'ft': 0.3048},
+    defFrom: 'mm', defTo: 'in'
   },
   pressure: {
-    base: 'Pa',
-    units: {
-      Pa:   { name: 'Pascal (Pa)', factor: 1.0 },
-      kPa:  { name: 'Kilopascal (kPa)', factor: 1000.0 },
-      MPa:  { name: 'Megapascal (MPa)', factor: 1000000.0 },
-      bar:  { name: 'Bar', factor: 100000.0 },
-      psi:  { name: 'Pound per sq in (psi)', factor: 6894.757 },
-      atm:  { name: 'Standard Atmosphere (atm)', factor: 101325.0 }
-    }
-  },
-  energy: {
-    base: 'J',
-    units: {
-      J:    { name: 'Joule (J)', factor: 1.0 },
-      kJ:   { name: 'Kilojoule (kJ)', factor: 1000.0 },
-      cal:  { name: 'Calorie (cal)', factor: 4.184 },
-      kcal: { name: 'Kilocalorie (kcal)', factor: 4184.0 },
-      kWh:  { name: 'Kilowatt-hour (kWh)', factor: 3600000.0 }
-    }
-  },
-  temperature: {
-    units: {
-      C: { name: 'Celsius (°C)' },
-      F: { name: 'Fahrenheit (°F)' },
-      K: { name: 'Kelvin (K)' }
-    }
+    items: {'Pa': 1, 'kPa': 1000, 'bar': 100000, 'psi': 6894.757},
+    defFrom: 'bar', defTo: 'psi'
   }
 };
 
-let activeCategory = 'length';
+let currentTab = 'length';
 
 // DOM Elements
-const tabButtons = document.querySelectorAll('.tab-btn');
-const standardConverter = document.getElementById('standard-converter');
-const torqueConverter = document.getElementById('torque-converter');
-const fromValueInput = document.getElementById('from-value');
-const toValueInput = document.getElementById('to-value');
-const fromUnitSelect = document.getElementById('from-unit');
-const toUnitSelect = document.getElementById('to-unit');
-const swapBtn = document.getElementById('swap-btn');
-const formulaDisplay = document.getElementById('formula-display');
+const fromVal = document.getElementById('from-value');
+const toVal = document.getElementById('to-value');
+const fromUnit = document.getElementById('from-unit');
+const toUnit = document.getElementById('to-unit');
+const formulaDisp = document.getElementById('formula-display');
 
-// Torque Tab Elements
-const torqueInput = document.getElementById('torque-input');
-const rpmInput = document.getElementById('rpm-input');
-const powerKwDisplay = document.getElementById('power-kw');
-const powerHpDisplay = document.getElementById('power-hp');
-
-// Setup Dropdowns
-function populateUnitDropdowns(category) {
-  const units = unitData[category].units;
-  fromUnitSelect.innerHTML = '';
-  toUnitSelect.innerHTML = '';
-
-  const keys = Object.keys(units);
-  keys.forEach((key, index) => {
-    const optFrom = new Option(units[key].name, key);
-    const optTo = new Option(units[key].name, key);
-    fromUnitSelect.add(optFrom);
-    toUnitSelect.add(optTo);
+function populateUnits(tab) {
+  if (!UNITS[tab]) return;
+  fromUnit.innerHTML = ''; toUnit.innerHTML = '';
+  
+  Object.keys(UNITS[tab].items).forEach(key => {
+    fromUnit.add(new Option(key, key));
+    toUnit.add(new Option(key, key));
   });
-
-  if (keys.length > 1) {
-    fromUnitSelect.selectedIndex = 0;
-    toUnitSelect.selectedIndex = 1;
-  }
+  
+  fromUnit.value = UNITS[tab].defFrom;
+  toUnit.value = UNITS[tab].defTo;
 }
 
-// Convert logic
-function calculateConversion() {
-  const val = parseFloat(fromValueInput.value);
-  if (isNaN(val)) {
-    toValueInput.value = '';
-    formulaDisplay.textContent = 'Enter a valid numeric value';
-    return;
-  }
-
-  const fromUnit = fromUnitSelect.value;
-  const toUnit = toUnitSelect.value;
-  let result = 0;
-
-  if (activeCategory === 'temperature') {
-    // Temperature conversion
-    let kelvin = 0;
-    if (fromUnit === 'C') kelvin = val + 273.15;
-    else if (fromUnit === 'F') kelvin = (val - 32) * (5 / 9) + 273.15;
-    else kelvin = val;
-
-    if (toUnit === 'C') result = kelvin - 273.15;
-    else if (toUnit === 'F') result = (kelvin - 273.15) * (9 / 5) + 32;
-    else result = kelvin;
-  } else {
-    // Factor based conversion
-    const cat = unitData[activeCategory];
-    const baseValue = val * cat.units[fromUnit].factor;
-    result = baseValue / cat.units[toUnit].factor;
-  }
-
-  // Formatting output
-  const formattedResult = Number(result.toFixed(6));
-  toValueInput.value = formattedResult;
-  formulaDisplay.textContent = `${val} ${fromUnit} = ${formattedResult} ${toUnit}`;
+function calculateStandard() {
+  if (currentTab === 'mechanical' || currentTab === 'pump') return;
+  
+  const val = parseFloat(fromVal.value) || 0;
+  const f = fromUnit.value;
+  const t = toUnit.value;
+  
+  const fFactor = UNITS[currentTab].items[f];
+  const tFactor = UNITS[currentTab].items[t];
+  
+  const result = (val * fFactor) / tFactor;
+  toVal.value = result.toFixed(4);
+  formulaDisp.textContent = `> DIM_SCALE: 1 ${f} = ${(fFactor/tFactor).toFixed(4)} ${t}`;
+  
+  cmdInput.value = `COMPUTING DIMENSION... [${val} ${f} -> ${result.toFixed(4)} ${t}]`;
 }
 
-// Torque & Power calculation: P = T * (2 * PI * RPM / 60)
-function calculateTorquePower() {
-  const torque = parseFloat(torqueInput.value) || 0;
-  const rpm = parseFloat(rpmInput.value) || 0;
+// Mechanical (Torque & Power) Calculation
+function calculateMechanical() {
+  const T = parseFloat(document.getElementById('mech-torque').value) || 0;
+  const rpm = parseFloat(document.getElementById('mech-rpm').value) || 0;
   
   const omega = (2 * Math.PI * rpm) / 60;
-  const powerWatts = torque * omega;
-  const powerKw = powerWatts / 1000;
-  const powerHp = powerWatts / 745.699872;
-
-  powerKwDisplay.textContent = `${powerKw.toFixed(2)} kW`;
-  powerHpDisplay.textContent = `${powerHp.toFixed(2)} HP`;
+  const powerKW = (T * omega) / 1000;
+  
+  document.getElementById('mech-omega').textContent = `${omega.toFixed(2)} rad/s`;
+  document.getElementById('mech-kw').textContent = `${powerKW.toFixed(2)} kW`;
+  
+  cmdInput.value = `ANALYZING KINEMATICS... [P = ${powerKW.toFixed(2)} kW]`;
 }
 
-// Tab Switching
-tabButtons.forEach(btn => {
-  btn.addEventListener('click', () => {
-    tabButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+// New Module: Turbine / Pump Hydraulic Power Calculation
+function calculatePump() {
+  const H = parseFloat(document.getElementById('pump-head').value) || 0;
+  const Q = parseFloat(document.getElementById('pump-flow').value) || 0;
+  const eff = (parseFloat(document.getElementById('pump-eff').value) || 100) / 100;
+  
+  // P = (rho * g * H * Q) / efficiency
+  const rho = 1000; // kg/m3 (Water)
+  const g = 9.81;
+  const powerKW = (rho * g * H * Q) / (1000 * eff);
+  
+  document.getElementById('pump-power').textContent = `${powerKW.toFixed(2)} kW`;
+  cmdInput.value = `FLUID DYNAMICS SIMULATION... [Hydraulic Power = ${powerKW.toFixed(2)} kW]`;
+}
 
-    activeCategory = btn.getAttribute('data-category');
-
-    if (activeCategory === 'torque') {
-      standardConverter.classList.add('hidden');
-      torqueConverter.classList.remove('hidden');
-      calculateTorquePower();
+// Event Listeners
+document.querySelectorAll('.tool-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    
+    currentTab = e.target.getAttribute('data-tab');
+    document.querySelectorAll('.cad-panel').forEach(p => p.classList.add('hidden'));
+    
+    logCommand(`SWITCH_WORKSPACE: ${currentTab.toUpperCase()}`);
+    
+    if (currentTab === 'mechanical') {
+      document.getElementById('mechanical-panel').classList.remove('hidden');
+      calculateMechanical();
+    } else if (currentTab === 'pump') {
+      document.getElementById('pump-panel').classList.remove('hidden');
+      calculatePump();
     } else {
-      torqueConverter.classList.add('hidden');
-      standardConverter.classList.remove('hidden');
-      populateUnitDropdowns(activeCategory);
-      calculateConversion();
+      document.getElementById('standard-panel').classList.remove('hidden');
+      populateUnits(currentTab);
+      calculateStandard();
     }
   });
 });
 
-// Event Listeners
-fromValueInput.addEventListener('input', calculateConversion);
-fromUnitSelect.addEventListener('change', calculateConversion);
-toUnitSelect.addEventListener('change', calculateConversion);
+[fromVal, fromUnit, toUnit].forEach(el => el.addEventListener('input', () => {
+  calculateStandard();
+  logCommand(`UPDATE_VAR: ${fromVal.value} ${fromUnit.value}`);
+}));
 
-swapBtn.addEventListener('click', () => {
-  const temp = fromUnitSelect.value;
-  fromUnitSelect.value = toUnitSelect.value;
-  toUnitSelect.value = temp;
-  calculateConversion();
+document.getElementById('swap-btn').addEventListener('click', () => {
+  const temp = fromUnit.value;
+  fromUnit.value = toUnit.value;
+  toUnit.value = temp;
+  calculateStandard();
+  logCommand('EXECUTE: MIRROR_AXIS');
 });
 
-torqueInput.addEventListener('input', calculateTorquePower);
-rpmInput.addEventListener('input', calculateTorquePower);
-
-// Dark / Light Theme Toggle & Persistence
-const themeToggleBtn = document.getElementById('theme-toggle');
-const themeIcon = document.getElementById('theme-icon');
-
-function initTheme() {
-  const savedTheme = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-
-  if (isDark) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    themeIcon.textContent = '☀️';
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-    themeIcon.textContent = '🌙';
-  }
-}
-
-themeToggleBtn.addEventListener('click', () => {
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-  if (currentTheme === 'dark') {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.setItem('theme', 'light');
-    themeIcon.textContent = '🌙';
-  } else {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('theme', 'dark');
-    themeIcon.textContent = '☀️';
-  }
+['mech-torque', 'mech-rpm'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calculateMechanical);
 });
 
-// Initial run
-initTheme();
-populateUnitDropdowns('length');
-calculateConversion();
+['pump-head', 'pump-flow', 'pump-eff'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calculatePump);
+});
+
+// Init
+populateUnits('length');
+calculateStandard();
