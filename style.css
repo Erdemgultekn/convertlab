@@ -1,452 +1,280 @@
 :root {
-  --bg-color: #f8fafc;
-  --surface-color: #ffffff;
-  --surface-border: #e2e8f0;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --accent-color: #ea580c;
-  --accent-hover: #c2410c;
-  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
-  --input-bg: #f8fafc;
-  --input-border: #cbd5e1;
-}
-
-[data-theme="dark"] {
-  --bg-color: #0b0f17;
-  --surface-color: #151d2a;
-  --surface-border: #243247;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --accent-color: #f97316;
-  --accent-hover: #fb923c;
-  --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-  --input-bg: #0d1420;
-  --input-border: #334155;
+  --cad-bg: #041424; /* Derin Blueprint Mavisi */
+  --cad-grid-major: rgba(255, 255, 255, 0.15);
+  --cad-grid-minor: rgba(255, 255, 255, 0.05);
+  --cad-text: #00ffcc; /* Neon Cyan */
+  --cad-text-dim: #88a4c3;
+  --cad-yellow: #ffcc00; /* CAD Seçim Sarısı */
+  --cad-red: #ff3333;
+  --cad-border: #00ffcc;
 }
 
 * {
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Inter', -apple-system, sans-serif;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  box-sizing: border-box;
+  font-family: 'Share Tech Mono', monospace;
+  cursor: crosshair !important; /* Tüm sitede imleci artı şekline getirir */
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  min-height: 100vh;
+  background-color: var(--cad-bg);
+  color: var(--cad-text);
+  height: 100vh;
+  overflow: hidden;
+  /* Teknik Çizim Grid (Izgara) Arka Planı */
+  background-image: 
+    linear-gradient(var(--cad-grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cad-grid-major) 1px, transparent 1px),
+    linear-gradient(var(--cad-grid-minor) 1px, transparent 1px),
+    linear-gradient(90deg, var(--cad-grid-minor) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  background-position: -1px -1px;
+}
+
+/* Dinamik CAD İmleci (Eksen Çizgileri) */
+.crosshair-x {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  width: 100vw;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  z-index: 9999;
+}
+.crosshair-y {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Çizim Masası Çerçevesi */
+.drafting-board {
+  height: calc(100vh - 120px);
+  margin: 20px;
+  border: 2px solid var(--cad-border);
+  position: relative;
   display: flex;
   flex-direction: column;
 }
 
-/* Navbar */
-.navbar {
-  border-bottom: 1px solid var(--surface-border);
-  background-color: var(--surface-color);
-  position: sticky;
-  top: 0;
-  z-index: 50;
+.drawing-frame {
+  flex: 1;
+  padding: 20px;
+  position: relative;
 }
 
-.nav-container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 1rem 1.5rem;
+/* Üst Bilgi */
+.cad-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  border-bottom: 1px dashed var(--cad-grid-major);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.logo {
+.blinking-cursor {
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* Komut Butonları (Ribbon) */
+.tool-ribbon {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 700;
-  font-size: 1.25rem;
+  gap: 15px;
+  margin-bottom: 40px;
 }
 
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.nav-links a {
-  text-decoration: none;
-  color: var(--text-muted);
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-.nav-links a:hover {
-  color: var(--accent-color);
-}
-
-.theme-btn {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  padding: 0.4rem 0.75rem;
-  border-radius: 9999px;
-  cursor: pointer;
+.tool-btn {
+  background: transparent;
+  border: 1px solid var(--cad-grid-major);
+  color: var(--cad-text-dim);
+  padding: 8px 12px;
   font-size: 1rem;
+  transition: all 0.2s;
 }
 
-/* Hero */
-.main-content {
-  flex: 1;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 3rem 1.5rem;
-  width: 100%;
+.tool-btn:hover {
+  border-color: var(--cad-yellow);
+  color: var(--cad-yellow);
 }
 
-.hero {
-  text-align: center;
-  margin-bottom: 3rem;
+.tool-btn.active {
+  background: rgba(0, 255, 204, 0.1);
+  border-color: var(--cad-text);
+  color: var(--cad-text);
 }
 
-.hero-title {
-  font-size: 2.75rem;
-  line-height: 1.2;
-  font-weight: 800;
-  margin-bottom: 1rem;
-}
-
-.accent-text {
-  color: var(--accent-color);
-}
-
-.hero-subtitle {
-  color: var(--text-muted);
-  font-size: 1.15rem;
-  max-width: 650px;
+/* Giriş Alanları (Boyutlandırma Çizgileri Gibi) */
+.cad-panel {
+  max-width: 700px;
   margin: 0 auto;
 }
 
-/* Converter Card */
-.converter-section {
+.dim-line {
   display: flex;
-  justify-content: center;
-  margin-bottom: 4rem;
+  align-items: center;
+  border-bottom: 1px solid var(--cad-border);
+  margin-bottom: 25px;
+  position: relative;
 }
 
-.converter-card {
-  background: var(--surface-color);
-  border: 1px solid var(--surface-border);
-  border-radius: 20px;
-  box-shadow: var(--card-shadow);
-  width: 100%;
-  max-width: 760px;
-  padding: 1.75rem;
+/* Dimension okları */
+.dim-line::before, .dim-line::after {
+  content: '◄';
+  position: absolute;
+  bottom: -8px;
+  color: var(--cad-border);
+  font-size: 0.7rem;
+}
+.dim-line::before { left: 0; }
+.dim-line::after { right: 0; content: '►'; }
+
+.dim-text {
+  font-size: 0.9rem;
+  color: var(--cad-yellow);
+  width: 150px;
 }
 
-.category-tabs {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--surface-border);
-  margin-bottom: 2rem;
-  scrollbar-width: none;
-}
-
-.tab-btn {
+.dim-line input {
   background: transparent;
   border: none;
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  white-space: nowrap;
+  color: white;
+  font-size: 1.8rem;
+  font-family: 'JetBrains Mono', monospace;
+  outline: none;
+  flex: 1;
+  text-align: center;
 }
 
-.tab-btn:hover {
-  color: var(--text-main);
-}
-
-.tab-btn.active {
-  background: var(--accent-color);
-  color: #ffffff;
-}
-
-.converter-grid {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.input-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.input-group input, 
-.input-group select {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  color: var(--text-main);
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  font-size: 1.1rem;
+.dim-line select {
+  background: var(--cad-bg);
+  color: var(--cad-text);
+  border: 1px solid var(--cad-grid-major);
+  padding: 5px;
   outline: none;
 }
 
-.input-group input:focus, 
-.input-group select:focus {
-  border-color: var(--accent-color);
+.result-line {
+  border-bottom-color: var(--cad-yellow);
+}
+.result-line::before, .result-line::after {
+  color: var(--cad-yellow);
+}
+.result-line input {
+  color: var(--cad-yellow);
 }
 
-.swap-btn {
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
-  color: var(--text-main);
-  font-size: 1.3rem;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1.25rem;
+.cad-swap {
+  background: transparent;
+  border: 1px dashed var(--cad-grid-major);
+  color: var(--cad-text-dim);
+  padding: 5px 15px;
+  display: block;
+  margin: -10px auto 25px auto;
 }
+.cad-swap:hover { color: white; border-color: white; }
 
-.swap-btn:hover {
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-}
-
-.conversion-summary {
-  margin-top: 1.75rem;
-  padding-top: 1.25rem;
-  border-top: 1px dashed var(--surface-border);
+.formula-display {
   text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1rem;
-  color: var(--accent-color);
-  font-weight: 500;
-}
-
-/* Special Tab */
-.hidden {
-  display: none !important;
-}
-
-.engineering-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.input-with-unit {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-with-unit input {
-  width: 100%;
-  padding-right: 3.5rem;
-}
-
-.unit-tag {
-  position: absolute;
-  right: 1rem;
-  color: var(--text-muted);
-  font-weight: 600;
+  color: var(--cad-text-dim);
   font-size: 0.9rem;
+  margin-top: 20px;
 }
 
-.engineering-result {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
+/* Mühendislik Çıktıları */
+.engineering-output {
+  border: 1px solid var(--cad-grid-major);
+  padding: 15px;
+  background: rgba(0,0,0,0.3);
 }
 
-.result-box {
-  background: var(--input-bg);
-  border: 1px solid var(--surface-border);
-  padding: 1rem;
-  border-radius: 12px;
-  text-align: center;
+.eng-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+}
+.eng-row.highlight {
+  color: var(--cad-yellow);
+  font-weight: bold;
+  border-top: 1px dashed var(--cad-grid-major);
+  padding-top: 10px;
 }
 
-.result-label {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.result-val {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--accent-color);
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.formula-footnote {
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: 0.5rem;
-}
-
-/* Pricing Section */
-.pricing-section {
-  text-align: center;
-  margin-top: 2rem;
-}
-
-.section-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-}
-
-.section-subtitle {
-  color: var(--text-muted);
-  margin-bottom: 2.5rem;
-}
-
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-  max-width: 760px;
-  margin: 0 auto;
-}
-
-.pricing-card {
-  background: var(--surface-color);
-  border: 1px solid var(--surface-border);
-  border-radius: 16px;
-  padding: 2rem;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.pricing-card.featured {
-  border: 2px solid var(--accent-color);
-}
-
-.badge {
+/* Teknik Antet (Title Block) */
+.title-block {
   position: absolute;
-  top: -12px;
+  bottom: 20px;
   right: 20px;
-  background: var(--accent-color);
+  border-collapse: collapse;
+  width: 650px;
+  background: var(--cad-bg);
+}
+
+.title-block td {
+  border: 1px solid var(--cad-border);
+  padding: 8px 12px;
+}
+
+.title-main {
+  font-size: 1.1rem;
+  font-weight: bold;
   color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.6rem;
-  border-radius: 9999px;
-  text-transform: uppercase;
 }
 
-.tier-name {
-  font-size: 1.3rem;
-  font-weight: 700;
+.title-sub {
+  font-size: 0.8rem;
+  color: var(--cad-text-dim);
+  vertical-align: top;
 }
 
-.tier-price {
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin: 0.75rem 0;
-}
-
-.tier-price .period {
-  font-size: 1rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.tier-desc {
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  margin-bottom: 1.5rem;
-  line-height: 1.4;
-}
-
-.features-list {
-  list-style: none;
+/* Komut Satırı (Command Line) */
+.command-line {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
+  background: #020a12;
+  border-top: 2px solid var(--cad-grid-major);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 2rem;
+  padding: 5px 20px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cmd-history {
   flex: 1;
+  overflow-y: hidden;
+  color: #a0a0a0;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  margin-bottom: 5px;
 }
 
-.features-list li {
-  font-size: 0.9rem;
-  color: var(--text-muted);
+.cmd-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-
-.pricing-btn {
-  width: 100%;
-  padding: 0.75rem;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
+.cmd-prompt { font-weight: bold; color: white; }
+.cmd-input input {
+  background: transparent;
   border: none;
-}
-
-.pricing-btn.primary {
-  background: var(--accent-color);
   color: white;
+  width: 100%;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  outline: none;
 }
 
-.pricing-btn.primary:hover {
-  background: var(--accent-hover);
-}
-
-.pricing-btn.secondary {
-  background: var(--input-bg);
-  color: var(--text-muted);
-  cursor: not-allowed;
-  border: 1px solid var(--surface-border);
-}
-
-.footer {
-  text-align: center;
-  padding: 2rem;
-  border-top: 1px solid var(--surface-border);
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 640px) {
-  .hero-title {
-    font-size: 2rem;
-  }
-  .converter-grid {
-    grid-template-columns: 1fr;
-  }
-  .swap-btn {
-    margin: 0 auto;
-    transform: rotate(90deg);
-  }
-  .engineering-grid, .engineering-result {
-    grid-template-columns: 1fr;
-  }
-}
+.hidden { display: none !important; }
