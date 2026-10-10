@@ -19,13 +19,16 @@
   <div class="drafting-board">
     <div class="drawing-frame">
       
-      <!-- Top HUD -->
+      <!-- Top HUD & System Controls -->
       <header class="cad-header">
         <div class="cad-logo">
-          <span>[+] ConvertCAD_V2.0</span>
-          <span class="blinking-cursor">_</span>
+          <span>[+] ConvertCAD_V3.0</span><span class="blinking-cursor">_</span>
         </div>
-        <div class="cad-coords" id="coords-display">X: 0.0000, Y: 0.0000</div>
+        <div class="system-controls">
+          <button class="sys-btn" id="theme-btn">[INVERT_PAPER]</button>
+          <button class="sys-btn" id="license-btn" data-tab="license">[LICENSE_MGR]</button>
+          <div class="cad-coords" id="coords-display">X: 0.0000, Y: 0.0000</div>
+        </div>
       </header>
 
       <!-- Command Toolbars -->
@@ -77,7 +80,7 @@
           </div>
         </div>
 
-        <!-- NEW: Turbine / Pump Panel -->
+        <!-- Turbine / Pump Panel -->
         <div id="pump-panel" class="cad-panel hidden">
           <div class="dim-line">
             <span class="dim-text">HEAD_H (m)</span>
@@ -99,27 +102,63 @@
           </div>
         </div>
 
+        <!-- NEW: License Manager Panel (SaaS Pricing) -->
+        <div id="license-panel" class="cad-panel hidden">
+          <div class="license-box">
+            <h2 class="license-title">SOFTWARE LICENSING SYSTEM</h2>
+            
+            <div class="license-tier">
+              <div class="tier-header">
+                <h3>[x] STUDENT EDITION ($0)</h3>
+                <span class="status active">ACTIVE</span>
+              </div>
+              <ul class="tier-features">
+                <li>> 4 Base Engineering Modules</li>
+                <li>> Standard 4-Decimal Precision</li>
+                <li>> Local Session History</li>
+              </ul>
+            </div>
+
+            <div class="license-tier pro">
+              <div class="tier-header">
+                <h3>[ ] PRO COMMERCIAL ($4/mo)</h3>
+                <span class="status inactive" id="pro-status">INACTIVE</span>
+              </div>
+              <ul class="tier-features">
+                <li>> Export Calculation Logs to .TXT</li>
+                <li>> High Precision Mode (6-Decimals)</li>
+                <li>> Unlocks Lab Report Generation</li>
+              </ul>
+              <button class="upgrade-btn" id="upgrade-btn">AUTHORIZE PRO UPGRADE</button>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Technical Drawing Title Block (Antet) -->
       <table class="title-block">
         <tr>
           <td colspan="2" class="title-main">PROJECT: TURBINE MAINTENANCE & REPAIR UNIT</td>
-          <td class="title-sub">TOLERANCE:<br>±0.05</td>
+          <td class="title-sub" id="precision-display">PRECISION:<br>4-DECIMAL</td>
           <td class="title-sub">SCALE:<br>1:1</td>
         </tr>
         <tr>
           <td class="title-sub" style="width: 30%">DESIGNER:<br>ERDEM GÜLTEKİN</td>
           <td class="title-main">PART: RUBBER BEARING BUSHING / KAPLİN TAKOZU</td>
           <td class="title-sub">DWG NO:<br>ME-4830</td>
-          <td class="title-sub">REV:<br>01</td>
+          <td class="title-sub" id="license-display">REV (LIC):<br>STUDENT</td>
         </tr>
       </table>
 
     </div>
 
-    <!-- AutoCAD Style Command Line -->
+    <!-- AutoCAD Style Command Line with Export Option -->
     <div class="command-line">
+      <div class="cmd-top-bar">
+        <span class="cmd-title">SYSTEM_LOG</span>
+        <button class="sys-btn" id="export-btn" title="Requires PRO License">[EXPORT_LOGS]</button>
+      </div>
       <div class="cmd-history" id="cmd-history">
         <div>ConvertCAD System Initialized...</div>
         <div>Loading physics modules... Done.</div>
