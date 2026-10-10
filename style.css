@@ -191,3 +191,81 @@ body {
 }
 
 .hidden { display: none !important; }
+/* --- MOBİL UYUM (RESPONSIVE DESIGN) EKLENTİSİ --- */
+
+/* Çizim tahtasının içini mobilde kaydırılabilir yapar */
+.drawing-frame {
+  overflow-y: auto; 
+  overflow-x: hidden;
+  padding-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+  /* Üst paneli alt alta dizer */
+  .cad-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .system-controls {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* Sekmeleri parmakla sağa sola kaydırılabilir (swipe) yapar */
+  .tool-ribbon {
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .tool-btn {
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+
+  /* Girdi alanlarını dikey hizalar */
+  .dim-line {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .dim-line::before, .dim-line::after {
+    display: none; /* Mobilde okları gizler */
+  }
+
+  .dim-text {
+    width: 100%;
+    text-align: left;
+  }
+
+  .dim-line input {
+    font-size: 1.4rem;
+    text-align: left;
+  }
+
+  /* Lisans Kutusu boyutlandırması */
+  .license-box {
+    padding: 15px;
+  }
+
+  .license-title {
+    font-size: 1.2rem;
+  }
+
+  /* Teknik Anteti (Title Block) sayfa sonuna itip alt alta dizer */
+  .title-block {
+    position: relative; 
+    width: 100%;
+    bottom: auto;
+    right: auto;
+    margin-top: 30px;
+  }
+
+  .title-block td {
+    display: block;
+    width: 100% !important;
+  }
+}
