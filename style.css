@@ -1,12 +1,25 @@
 :root {
-  --cad-bg: #041424; /* Derin Blueprint Mavisi */
+  /* Default Dark Blueprint */
+  --cad-bg: #041424; 
   --cad-grid-major: rgba(255, 255, 255, 0.15);
   --cad-grid-minor: rgba(255, 255, 255, 0.05);
-  --cad-text: #00ffcc; /* Neon Cyan */
+  --cad-text: #00ffcc; 
   --cad-text-dim: #88a4c3;
-  --cad-yellow: #ffcc00; /* CAD Seçim Sarısı */
-  --cad-red: #ff3333;
+  --cad-yellow: #ffcc00; 
   --cad-border: #00ffcc;
+  --cad-panel-bg: rgba(0,0,0,0.3);
+}
+
+/* Light Whiteprint Theme */
+[data-theme="light"] {
+  --cad-bg: #f4f6f9; 
+  --cad-grid-major: rgba(0, 50, 150, 0.2);
+  --cad-grid-minor: rgba(0, 50, 150, 0.08);
+  --cad-text: #003366; 
+  --cad-text-dim: #557799;
+  --cad-yellow: #cc0000; 
+  --cad-border: #003366;
+  --cad-panel-bg: rgba(255,255,255,0.6);
 }
 
 * {
@@ -14,7 +27,8 @@
   padding: 0;
   box-sizing: border-box;
   font-family: 'Share Tech Mono', monospace;
-  cursor: crosshair !important; /* Tüm sitede imleci artı şekline getirir */
+  cursor: crosshair !important;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 body {
@@ -22,7 +36,6 @@ body {
   color: var(--cad-text);
   height: 100vh;
   overflow: hidden;
-  /* Teknik Çizim Grid (Izgara) Arka Planı */
   background-image: 
     linear-gradient(var(--cad-grid-major) 1px, transparent 1px),
     linear-gradient(90deg, var(--cad-grid-major) 1px, transparent 1px),
@@ -32,31 +45,18 @@ body {
   background-position: -1px -1px;
 }
 
-/* Dinamik CAD İmleci (Eksen Çizgileri) */
+/* Dinamik CAD İmleci */
 .crosshair-x {
-  position: fixed;
-  top: 50%;
-  left: 0;
-  width: 100vw;
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.2);
-  pointer-events: none;
-  z-index: 9999;
+  position: fixed; top: 50%; left: 0; width: 100vw; height: 1px;
+  background-color: var(--cad-border); opacity: 0.3; pointer-events: none; z-index: 9999;
 }
 .crosshair-y {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  width: 1px;
-  height: 100vh;
-  background-color: rgba(255, 255, 255, 0.2);
-  pointer-events: none;
-  z-index: 9999;
+  position: fixed; top: 0; left: 50%; width: 1px; height: 100vh;
+  background-color: var(--cad-border); opacity: 0.3; pointer-events: none; z-index: 9999;
 }
 
-/* Çizim Masası Çerçevesi */
 .drafting-board {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 140px);
   margin: 20px;
   border: 2px solid var(--cad-border);
   position: relative;
@@ -65,216 +65,129 @@ body {
 }
 
 .drawing-frame {
-  flex: 1;
-  padding: 20px;
-  position: relative;
+  flex: 1; padding: 20px; position: relative;
 }
 
-/* Üst Bilgi */
 .cad-header {
-  display: flex;
-  justify-content: space-between;
+  display: flex; justify-content: space-between; align-items: center;
   border-bottom: 1px dashed var(--cad-grid-major);
-  padding-bottom: 10px;
-  margin-bottom: 20px;
+  padding-bottom: 10px; margin-bottom: 20px;
 }
 
-.blinking-cursor {
-  animation: blink 1s step-end infinite;
+.system-controls {
+  display: flex; gap: 15px; align-items: center;
 }
+
+.sys-btn {
+  background: transparent;
+  border: 1px solid var(--cad-border);
+  color: var(--cad-border);
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  cursor: pointer !important;
+}
+.sys-btn:hover {
+  background: var(--cad-border);
+  color: var(--cad-bg);
+}
+
+.blinking-cursor { animation: blink 1s step-end infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* Komut Butonları (Ribbon) */
 .tool-ribbon {
-  display: flex;
-  gap: 15px;
-  margin-bottom: 40px;
+  display: flex; gap: 15px; margin-bottom: 40px;
 }
 
 .tool-btn {
-  background: transparent;
-  border: 1px solid var(--cad-grid-major);
-  color: var(--cad-text-dim);
-  padding: 8px 12px;
-  font-size: 1rem;
-  transition: all 0.2s;
+  background: transparent; border: 1px solid var(--cad-grid-major);
+  color: var(--cad-text-dim); padding: 8px 12px; font-size: 1rem;
 }
-
-.tool-btn:hover {
-  border-color: var(--cad-yellow);
-  color: var(--cad-yellow);
-}
-
+.tool-btn:hover { border-color: var(--cad-yellow); color: var(--cad-yellow); }
 .tool-btn.active {
-  background: rgba(0, 255, 204, 0.1);
-  border-color: var(--cad-text);
-  color: var(--cad-text);
+  background: rgba(0, 255, 204, 0.1); border-color: var(--cad-text); color: var(--cad-text);
 }
+[data-theme="light"] .tool-btn.active { background: rgba(0, 51, 102, 0.1); }
 
-/* Giriş Alanları (Boyutlandırma Çizgileri Gibi) */
-.cad-panel {
-  max-width: 700px;
-  margin: 0 auto;
-}
+.cad-panel { max-width: 700px; margin: 0 auto; }
 
 .dim-line {
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--cad-border);
-  margin-bottom: 25px;
-  position: relative;
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--cad-border); margin-bottom: 25px; position: relative;
 }
-
-/* Dimension okları */
 .dim-line::before, .dim-line::after {
-  content: '◄';
-  position: absolute;
-  bottom: -8px;
-  color: var(--cad-border);
-  font-size: 0.7rem;
+  content: '◄'; position: absolute; bottom: -8px; color: var(--cad-border); font-size: 0.7rem;
 }
 .dim-line::before { left: 0; }
 .dim-line::after { right: 0; content: '►'; }
 
-.dim-text {
-  font-size: 0.9rem;
-  color: var(--cad-yellow);
-  width: 150px;
-}
+.dim-text { font-size: 0.9rem; color: var(--cad-yellow); width: 150px; }
 
 .dim-line input {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 1.8rem;
-  font-family: 'JetBrains Mono', monospace;
-  outline: none;
-  flex: 1;
-  text-align: center;
+  background: transparent; border: none; color: var(--cad-text);
+  font-size: 1.8rem; font-family: 'JetBrains Mono', monospace; outline: none;
+  flex: 1; text-align: center;
 }
-
 .dim-line select {
-  background: var(--cad-bg);
-  color: var(--cad-text);
-  border: 1px solid var(--cad-grid-major);
-  padding: 5px;
-  outline: none;
+  background: var(--cad-bg); color: var(--cad-text);
+  border: 1px solid var(--cad-grid-major); padding: 5px; outline: none;
 }
 
-.result-line {
-  border-bottom-color: var(--cad-yellow);
-}
-.result-line::before, .result-line::after {
-  color: var(--cad-yellow);
-}
-.result-line input {
-  color: var(--cad-yellow);
-}
+.result-line { border-bottom-color: var(--cad-yellow); }
+.result-line::before, .result-line::after { color: var(--cad-yellow); }
+.result-line input { color: var(--cad-yellow); }
 
 .cad-swap {
-  background: transparent;
-  border: 1px dashed var(--cad-grid-major);
-  color: var(--cad-text-dim);
-  padding: 5px 15px;
-  display: block;
-  margin: -10px auto 25px auto;
+  background: transparent; border: 1px dashed var(--cad-grid-major);
+  color: var(--cad-text-dim); padding: 5px 15px; display: block; margin: -10px auto 25px auto;
 }
-.cad-swap:hover { color: white; border-color: white; }
+.cad-swap:hover { color: var(--cad-text); border-color: var(--cad-text); }
 
-.formula-display {
-  text-align: center;
-  color: var(--cad-text-dim);
-  font-size: 0.9rem;
-  margin-top: 20px;
-}
+.formula-display { text-align: center; color: var(--cad-text-dim); font-size: 0.9rem; margin-top: 20px; }
 
-/* Mühendislik Çıktıları */
-.engineering-output {
-  border: 1px solid var(--cad-grid-major);
-  padding: 15px;
-  background: rgba(0,0,0,0.3);
-}
+.engineering-output { border: 1px solid var(--cad-grid-major); padding: 15px; background: var(--cad-panel-bg); }
+.eng-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 1.1rem; }
+.eng-row.highlight { color: var(--cad-yellow); font-weight: bold; border-top: 1px dashed var(--cad-grid-major); padding-top: 10px; }
 
-.eng-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 1.1rem;
+/* License Panel */
+.license-box { border: 2px dashed var(--cad-border); padding: 30px; background: var(--cad-panel-bg); }
+.license-title { text-align: center; margin-bottom: 30px; font-size: 1.5rem; letter-spacing: 2px; }
+.license-tier { border: 1px solid var(--cad-grid-major); padding: 20px; margin-bottom: 20px; }
+.license-tier.pro { border-color: var(--cad-yellow); }
+.tier-header { display: flex; justify-content: space-between; margin-bottom: 15px; }
+.tier-features { list-style: none; color: var(--cad-text-dim); line-height: 1.8; margin-bottom: 15px; }
+.status.active { color: #00ff00; }
+[data-theme="light"] .status.active { color: #008800; }
+.status.inactive { color: #ff3333; }
+.upgrade-btn {
+  width: 100%; padding: 12px; background: var(--cad-yellow); color: var(--cad-bg);
+  border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer !important;
 }
-.eng-row.highlight {
-  color: var(--cad-yellow);
-  font-weight: bold;
-  border-top: 1px dashed var(--cad-grid-major);
-  padding-top: 10px;
-}
+.upgrade-btn:hover { opacity: 0.9; }
 
-/* Teknik Antet (Title Block) */
+/* Title Block */
 .title-block {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  border-collapse: collapse;
-  width: 650px;
-  background: var(--cad-bg);
+  position: absolute; bottom: 20px; right: 20px; border-collapse: collapse; width: 650px; background: var(--cad-bg);
 }
+.title-block td { border: 1px solid var(--cad-border); padding: 8px 12px; }
+.title-main { font-size: 1.1rem; font-weight: bold; color: var(--cad-text); }
+.title-sub { font-size: 0.8rem; color: var(--cad-text-dim); vertical-align: top; }
 
-.title-block td {
-  border: 1px solid var(--cad-border);
-  padding: 8px 12px;
-}
-
-.title-main {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: white;
-}
-
-.title-sub {
-  font-size: 0.8rem;
-  color: var(--cad-text-dim);
-  vertical-align: top;
-}
-
-/* Komut Satırı (Command Line) */
+/* Command Line */
 .command-line {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 90px;
-  background: #020a12;
-  border-top: 2px solid var(--cad-grid-major);
-  display: flex;
-  flex-direction: column;
-  padding: 5px 20px;
-  font-family: 'JetBrains Mono', monospace;
+  position: fixed; bottom: 0; left: 0; width: 100%; height: 110px;
+  background: var(--cad-bg); border-top: 2px solid var(--cad-grid-major);
+  display: flex; flex-direction: column; padding: 5px 20px; font-family: 'JetBrains Mono', monospace;
 }
-
+.cmd-top-bar { display: flex; justify-content: space-between; border-bottom: 1px solid var(--cad-grid-major); padding-bottom: 5px; margin-bottom: 5px;}
+.cmd-title { font-size: 0.8rem; color: var(--cad-text-dim); }
 .cmd-history {
-  flex: 1;
-  overflow-y: hidden;
-  color: #a0a0a0;
-  font-size: 0.85rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  margin-bottom: 5px;
+  flex: 1; overflow-y: hidden; color: var(--cad-text-dim); font-size: 0.85rem;
+  display: flex; flex-direction: column; justify-content: flex-end; margin-bottom: 5px;
 }
-
-.cmd-input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.cmd-prompt { font-weight: bold; color: white; }
+.cmd-input { display: flex; align-items: center; gap: 10px; }
+.cmd-prompt { font-weight: bold; color: var(--cad-text); }
 .cmd-input input {
-  background: transparent;
-  border: none;
-  color: white;
-  width: 100%;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 1rem;
-  outline: none;
+  background: transparent; border: none; color: var(--cad-text); width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 1rem; outline: none;
 }
 
 .hidden { display: none !important; }
