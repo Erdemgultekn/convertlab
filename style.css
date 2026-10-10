@@ -191,81 +191,98 @@ body {
 }
 
 .hidden { display: none !important; }
-/* --- MOBİL UYUM (RESPONSIVE DESIGN) EKLENTİSİ --- */
-
-/* Çizim tahtasının içini mobilde kaydırılabilir yapar */
-.drawing-frame {
-  overflow-y: auto; 
-  overflow-x: hidden;
-  padding-bottom: 40px;
-}
-
+/* --- KESİN MOBİL UYUM VE DOKUNMATİK ÇÖZÜMÜ --- */
 @media (max-width: 768px) {
-  /* Üst paneli alt alta dizer */
+  /* 1. EKRAN KİLİDİNİ AÇ (Asıl dokunmatik sorununun çözümü) */
+  body {
+    overflow-y: auto !important; 
+    height: auto !important;
+  }
+
+  /* Dokunmatik ekranda CAD eksenlerini gizle */
+  .crosshair-x, .crosshair-y {
+    display: none !important;
+  }
+
+  /* 2. Çizim tahtasını serbest bırak */
+  .drafting-board {
+    margin: 5px;
+    height: auto !important;
+    overflow: visible !important; 
+    border: none; /* Mobilde ekranı daraltan çerçeveyi kaldır */
+  }
+
+  .drawing-frame {
+    padding: 10px;
+  }
+
+  /* Üst paneli alt alta diz */
   .cad-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
   }
   
   .system-controls {
     flex-wrap: wrap;
-    gap: 10px;
+    margin-top: 10px;
+    gap: 8px;
   }
 
-  /* Sekmeleri parmakla sağa sola kaydırılabilir (swipe) yapar */
+  /* 3. Menü butonlarını sağa-sola kaydırılabilir (swipe) yap */
   .tool-ribbon {
-    overflow-x: auto;
+    display: flex;
+    flex-wrap: nowrap; /* Butonların alt alta inmesini engeller */
+    overflow-x: auto; /* Yatay kaydırmayı açar */
+    -webkit-overflow-scrolling: touch; /* iPhone'larda akıcı kaydırma (momentum) sağlar */
+    gap: 8px;
+    margin-bottom: 25px;
     padding-bottom: 10px;
-    margin-bottom: 20px;
   }
 
   .tool-btn {
-    white-space: nowrap;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    white-space: nowrap; /* Buton yazılarının kırılmasını engeller */
   }
 
-  /* Girdi alanlarını dikey hizalar */
+  /* Girdi alanlarını telefona uyarla */
   .dim-line {
     flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
+    align-items: flex-start;
+    gap: 5px;
   }
 
   .dim-line::before, .dim-line::after {
-    display: none; /* Mobilde okları gizler */
+    display: none;
+  }
+
+  .dim-line input {
+    width: 100%;
+    text-align: left;
+    font-size: 1.3rem;
   }
 
   .dim-text {
     width: 100%;
-    text-align: left;
   }
 
-  .dim-line input {
-    font-size: 1.4rem;
-    text-align: left;
-  }
-
-  /* Lisans Kutusu boyutlandırması */
-  .license-box {
-    padding: 15px;
-  }
-
-  .license-title {
-    font-size: 1.2rem;
-  }
-
-  /* Teknik Anteti (Title Block) sayfa sonuna itip alt alta dizer */
+  /* Anteti (Title Block) en alta al ve listeye çevir */
   .title-block {
-    position: relative; 
-    width: 100%;
-    bottom: auto;
-    right: auto;
-    margin-top: 30px;
+    position: relative !important;
+    width: 100% !important;
+    bottom: auto !important;
+    right: auto !important;
+    margin-top: 40px;
+    margin-bottom: 120px; /* Alttaki terminalin altında kalmasın diye ekstra boşluk */
   }
 
   .title-block td {
     display: block;
     width: 100% !important;
+    border-bottom: none;
+  }
+  
+  .title-block tr:last-child td {
+    border-bottom: 1px solid var(--cad-border);
   }
 }
